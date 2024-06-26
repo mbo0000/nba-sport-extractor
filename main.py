@@ -1,13 +1,11 @@
 
-# from src.extractors import (
-#     GamesExtractor, GamesStatsExtractor
-# )
+from src.extractors import (
+    Context, GamesExtractor, GamesStatsExtractor
+)
 
 # entities_map = {
 #     'games': GamesExtractor
 # }
 
-# tmp = GamesStatsExtractor('seasons')
-# tmp.execute()
-
-print('test')
+context = Context(GamesExtractor('seasons'))
+context.extract()
