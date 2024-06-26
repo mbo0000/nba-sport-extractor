@@ -5,6 +5,7 @@ import logging
 import json
 import os
 
+'DEPRECATED'
 'TODO: maybe this should be handle by Airflow?'
 class S3_UploadUtil:
     def __init__(self) -> None:
@@ -15,7 +16,7 @@ class S3_UploadUtil:
     def upload_data(self, data_obj, s3_name_key):
 
         s3_client = boto3.client(
-            service_name            ='s3',
+            service_name            = 's3',
             region_name             = 'us-west-1',
             aws_access_key_id       = self.access_key,
             aws_secret_access_key   = self.secret

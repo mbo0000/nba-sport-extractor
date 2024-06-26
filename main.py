@@ -7,5 +7,5 @@ from src.extractors import (
 #     'games': GamesExtractor
 # }
 
-context = Context(GamesExtractor('seasons'))
-context.extract()
+# context = Context(GamesExtractor('seasons'))
+# context.extract()
