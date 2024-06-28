@@ -6,8 +6,8 @@ import pandas as pd
 
 ROLE = 'ACCOUNTADMIN'
 'TODO: create a staging area'
-DATABASE = 'PERSONAL'
-SCHEMA = 'PUBLIC'
+DATABASE = 'RAW'
+SCHEMA = 'NBA'
 
 class SnowfUtility():
 

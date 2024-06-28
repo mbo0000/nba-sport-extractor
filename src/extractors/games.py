@@ -35,5 +35,5 @@ class GamesExtractor(Extractor):
         for game in flatten_data:
             games.append({k:str(game[k]) for k in game})
 
-        with open('/shared/games.json', 'w', encoding='utf-8') as file:
+        with open('/shared/' + self.endpoint + '.json', 'w', encoding='utf-8') as file:
             file.write(json.dumps(games, indent=4))

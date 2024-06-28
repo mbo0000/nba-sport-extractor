@@ -30,7 +30,7 @@ def main():
     context     = Context(ent(endpoint=endpoint, param={}))
     context.extract()
 
-    file_path   = '/shared/'+ args['--entity'] +'.json'
+    file_path   = '/shared/'+ endpoint +'.json'
     dframe      = pd.read_json(file_path)
 
     snowf_util  = SnowfUtility()
