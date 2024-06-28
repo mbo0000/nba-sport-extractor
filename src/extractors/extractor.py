@@ -1,22 +1,21 @@
+from abc import abstractmethod
 import requests
 from requests import RequestException
-import json
 import logging
 import os
 
-BASE_URL        = 'https://v2.nba.api-sports.io/'
 QUOTA           = 95
 QUOTA_ENDPOINT  = 'status'
 
 class Extractor:
     
-    def __init__(self, entity, param = {}) -> None:
+    def __init__(self, endpoint = '', param = {}) -> None:
         self.host        = os.getenv('HOST')
         self.token       = os.getenv('TOKEN')
-        self.entity      = entity
+        self.base_url    = os.getenv('BASE_URL')
+        self.endpoint    = endpoint
         self.param       = param
-        self.base_url    = BASE_URL
-        self.url         = BASE_URL + entity
+        self.url         = self.base_url + self.endpoint
         self.daily_quota = QUOTA
         self.headers     = {
                         "X-RapidAPI-Key": self.token,
@@ -24,6 +23,14 @@ class Extractor:
                         "Content-Type": "application/json", 
                         "Accept": "application/json"
                     }
+
+    @abstractmethod 
+    def set_url(self):
+        pass
+
+    @abstractmethod
+    def set_param(self):
+        pass
 
     def _flatten(self, input_dict, separator='_', prefix='', skip=[]):
 
@@ -63,7 +70,7 @@ class Extractor:
             # Note: List under 'e' is not fully flattened because it contains both simple value
         """
 
-        if not isinstance(input_dict, dict) or not isinstance(input_dict, list):
+        if not isinstance(input_dict, dict) and not isinstance(input_dict, list):
             return input_dict
 
         output_dict = {}
@@ -102,10 +109,10 @@ class Extractor:
         '''
         res         = self._api_call(self.base_url + QUOTA_ENDPOINT)
         curr_quota  = res['response']['requests']['current']
+        print(f'current quota: {curr_quota}/100')
         logging.info(f'Current quota is {curr_quota}. Number of limit left: {QUOTA - curr_quota}')
         return curr_quota
         
-
     def make_request(self, url, params = {}):
         '''
         send request base on entity, endpoint and params given
@@ -122,15 +129,11 @@ class Extractor:
         return response
 
     def execute(self):
+
         logging.info(f'Making request to: {self.url}')
         data = self.make_request(self.url, self.param)
-        if not isinstance(data['response'], list):
-            logging.info(f'Empty result from {self.entity}')
-            return data['response']
+        if not data or not isinstance(data['response'], list):
+            logging.error(f'Empty result from {self.endpoint}')
+            return
 
-        flatten_data = []
-        for entity in data['response']:
-            flatten_data.append(self._flatten(entity))
-
-        'TODO: handle output'
-        print(flatten_data)
+        self.process_data(data)
