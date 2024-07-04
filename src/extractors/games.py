@@ -7,8 +7,11 @@ class GamesExtractor(Extractor):
         super().__init__(endpoint, param)
         self.set_url()
         self.set_param()
-
+    
     def _get_latest_season(self):
+        '''
+        dependency for games endpoint
+        '''
         seasons = self.make_request(self.base_url + 'seasons')['response']
         return seasons[-1]
 
@@ -25,9 +28,10 @@ class GamesExtractor(Extractor):
         flatten_data = []
         for game in data['response']:
             flatten = self._flatten(game)
-            flatten['_TIME_SYNC'] = datetime.now()
+            flatten['SYNC_TIME'] = datetime.now()
             flatten_data.append(flatten)  
 
+        # filter for finished games only, remove all scheduled games
         flatten_data = [game for game in flatten_data if game['status_long'] == 'Finished']
 
         # converting all val for each key as str for later load into snowflake

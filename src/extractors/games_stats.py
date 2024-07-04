@@ -5,5 +5,5 @@ class GamesStatsExtractor(Extractor):
 
         super().__init__(endpoint=endpoint, param=param)
         
-        self.endpoint = endpoint
-        self.param = param
+        self.endpoint   = endpoint
+        self.param      = param

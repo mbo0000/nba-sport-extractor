@@ -5,24 +5,25 @@ import logging
 import pandas as pd
 
 ROLE = 'ACCOUNTADMIN'
-'TODO: create a staging area'
-DATABASE = 'RAW'
-SCHEMA = 'NBA'
 
 class SnowfUtility():
 
-    def __init__(self) -> None:
-        
+    def __init__(self, endpoint = '', database= '', schema='') -> None:
+
+        self.database = database.strip().upper()
+        self.schema = schema.strip().upper()
+        self.table = endpoint.strip().upper()
+
         try:
             self.connection = snowflake.connector.connect(
                 user        =os.getenv('SNOWF_USER'),
                 password    =os.getenv('SNOWF_PW'),
                 account     =os.getenv('SNOWF_ACCOUNT'),
                 role        = ROLE,
-                database    = DATABASE,
-                schema      = SCHEMA,
+                database    = self.database,
+                schema      = self.schema,
                 session_parameters={
-                    'QUERY_TAG': 'Load games data'
+                    'QUERY_TAG': f'Load {self.table} data'
                 }
             )
             
@@ -32,7 +33,7 @@ class SnowfUtility():
 
     def _create_table(self, df:pd.DataFrame):
 
-        query   = f'create or replace transient table {DATABASE}.{SCHEMA}.GAMES ( \n' 
+        query   = f'create or replace transient table {self.database}.{self.schema}.{self.table} ( \n' 
         n_cols  = len(df.columns)
         for i, col in enumerate(df.columns):
             query += col + ' VARCHAR'
@@ -54,9 +55,9 @@ class SnowfUtility():
 
                 # 'TODO: refactor'
         results = write_pandas(
-            conn = self.connection
-            , df = df
-            , table_name='GAMES'
-            , database=DATABASE
-            , schema=SCHEMA
+            conn            = self.connection
+            , df            = df
+            , table_name    = self.table
+            , database      = self.database
+            , schema        = self.schema
         )
