@@ -1,6 +1,4 @@
 from .extractor import Extractor
-import json
-from datetime import datetime
 
 class GamesExtractor(Extractor):
     def __init__(self, endpoint, param) -> None:
@@ -22,22 +20,3 @@ class GamesExtractor(Extractor):
     def set_param(self):
         self.param['season'] = self._get_latest_season()
         return self.param
-
-    def process_data(self, data):
-
-        flatten_data = []
-        for game in data['response']:
-            flatten = self._flatten(game)
-            flatten['SYNC_TIME'] = datetime.now()
-            flatten_data.append(flatten)  
-
-        # filter for finished games only, remove all scheduled games
-        flatten_data = [game for game in flatten_data if game['status_long'] == 'Finished']
-
-        # converting all val for each key as str for later load into snowflake
-        games = []
-        for game in flatten_data:
-            games.append({k:str(game[k]) for k in game})
-
-        with open('/shared/' + self.endpoint + '.json', 'w', encoding='utf-8') as file:
-            file.write(json.dumps(games, indent=4))

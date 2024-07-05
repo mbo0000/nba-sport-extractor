@@ -3,6 +3,9 @@ import requests
 from requests import RequestException
 import logging
 import os
+from datetime import datetime
+import json
+
 
 QUOTA           = 95
 QUOTA_ENDPOINT  = 'status'
@@ -103,7 +106,7 @@ class Extractor:
         
         return None
 
-    def _get_current_quota(self):
+    def is_under_quota_limit(self):
         '''
         check current quota usage
         '''
@@ -111,8 +114,27 @@ class Extractor:
         curr_quota  = res['response']['requests']['current']
         print(f'current quota: {curr_quota}/100')
         logging.info(f'Current quota is {curr_quota}. Number of limit left: {QUOTA - curr_quota}')
-        return curr_quota
-        
+        return curr_quota <= self.daily_quota
+
+    def process_data(self, data):
+
+        if isinstance(data, dict):
+            data = data['response']
+
+        flatten_data = []
+        for el in data:
+            flatten = self._flatten(el)
+            flatten['SYNC_TIME'] = datetime.now()
+            flatten_data.append(flatten)  
+
+        # converting all val for each key as str for later load into snowflake
+        flatten = []
+        for el in flatten_data:
+            flatten.append({k:str(el[k]) for k in el})
+
+        with open('/shared/' + self.endpoint + '.json', 'w', encoding='utf-8') as file:
+            file.write(json.dumps(flatten, indent=4))
+
     def make_request(self, url, params = {}):
         '''
         send request base on entity, endpoint and params given
@@ -120,9 +142,7 @@ class Extractor:
         if not self.token:
             raise Exception('Error missing auth token')
 
-        curr_quota = self._get_current_quota()
-        if curr_quota >= self.daily_quota:
-            logging.error(f'Error current quota: {curr_quota}/{self.daily_quota}')
+        if not self.is_under_quota_limit():
             raise Exception('Error exceeded daily quota limit')
 
         response = self._api_call(url, params)
@@ -132,8 +152,9 @@ class Extractor:
 
         logging.info(f'Making request to: {self.url}')
         data = self.make_request(self.url, self.param)
-        if not data or not isinstance(data['response'], list):
+
+        if not data or len(data) == 0:
             logging.error(f'Empty result from {self.endpoint}')
             return
-
+            
         self.process_data(data)

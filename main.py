@@ -2,13 +2,13 @@ import sys
 from src.extractors import (
     Context, GamesExtractor, GamesStatsExtractor
 )
-from src.snowf_uploader import SnowfUtility
+from src.snowf_util import SnowfUtility
 import os
 import pandas as pd
 
 entities_map = {
     'games': GamesExtractor
-    ,'games_stats':GamesStatsExtractor
+    ,'games_statistics':GamesStatsExtractor
 }
 
 

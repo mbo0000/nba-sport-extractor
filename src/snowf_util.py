@@ -10,15 +10,15 @@ class SnowfUtility():
 
     def __init__(self, endpoint = '', database= '', schema='') -> None:
 
-        self.database = database.strip().upper()
-        self.schema = schema.strip().upper()
-        self.table = endpoint.strip().upper()
+        self.database   = database.strip().upper()
+        self.schema     = schema.strip().upper()
+        self.table      = endpoint.strip().upper()
 
         try:
             self.connection = snowflake.connector.connect(
-                user        =os.getenv('SNOWF_USER'),
-                password    =os.getenv('SNOWF_PW'),
-                account     =os.getenv('SNOWF_ACCOUNT'),
+                user        = os.getenv('SNOWF_USER'),
+                password    = os.getenv('SNOWF_PW'),
+                account     = os.getenv('SNOWF_ACCOUNT'),
                 role        = ROLE,
                 database    = self.database,
                 schema      = self.schema,
@@ -53,7 +53,7 @@ class SnowfUtility():
 
         self._create_table(df)
 
-                # 'TODO: refactor'
+        # 'TODO: refactor'
         results = write_pandas(
             conn            = self.connection
             , df            = df
@@ -61,3 +61,7 @@ class SnowfUtility():
             , database      = self.database
             , schema        = self.schema
         )
+
+    def query_from_table(self, query):
+        data = self.cursor.execute(query)
+        return data.fetchall()
