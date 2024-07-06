@@ -98,6 +98,8 @@ with DAG('data_extraction_dag', default_args=default_args, schedule_interval='@d
     extract_and_upload
 ```
 
+For a detail Airflow DAG using this project, visit [NBA Sport Airflow](https://github.com/mbo0000/nba-sport-airflow) repo.
+
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
