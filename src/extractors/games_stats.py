@@ -60,8 +60,6 @@ class GamesStatsExtractor(Extractor):
             response['response'][-1]['game_id'] = game
             result.extend(response['response'])
             
-            'TODO: remove break in production'
-            break
             # usage rate 10 requests per minute
             time.sleep(6)
 
