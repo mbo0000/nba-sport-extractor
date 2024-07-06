@@ -28,7 +28,7 @@ Welcome to the NBA data extraction and load repository. This project is an essen
 
 ## Architecture
 
-![Diagram]()
+![Diagram](https://github.com/mbo0000/nba-sport-extractor/blob/main/img/diagram.png)
 
 1. **API Data Extraction**: Retrieves data from specified API endpoints.
 2. **Data Transformation**: Prepare the data for insertion into Snowflake (if applicable).
