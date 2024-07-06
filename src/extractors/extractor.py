@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 from src.snowf_util import SnowfUtility
 import pandas as pd
+import time
 
 
 QUOTA           = 95
@@ -68,25 +69,39 @@ class Extractor:
         return {k.removesuffix('_'): v for k, v in output_dict.items()}
 
     def _api_call(self, url, params = {}):
-
+        '''
+        make api request with error handling for rate limit
+        '''
         try:
             response = requests.get(url, headers = self.headers, params = params)
-            if response.json()['errors']:
+
+            if response.status_code == 429 or response.status_code != 200:
                 logging.error(response.json()['errors'])
-            return response.json()
+                while response.status_code == 429:
+                    time.sleep(10)
+                    response = requests.get(url, headers = self.headers, params = params)
+
         except RequestException as e:
             logging.error(e)
         
-        return None
+        return response.json()
 
     def is_under_quota_limit(self):
         '''
         check current quota usage
         '''
-        res         = self._api_call(self.base_url + QUOTA_ENDPOINT)
-        curr_quota  = res['response']['requests']['current']
-        print(f'current quota: {curr_quota}/100')
+        res = self._api_call(self.base_url + QUOTA_ENDPOINT)
+        res = res['response']['requests']
+
+        if isinstance(res, list):
+            logging.Error('Error: reached daily quota')
+            return False
+
+        curr_quota = res['current']
+
+        print(f'current quota: {curr_quota}/{QUOTA}')
         logging.info(f'Current quota is {curr_quota}. Number of limit left: {QUOTA - curr_quota}')
+        
         return curr_quota <= self.daily_quota
 
     def process_data(self, data, file_path):
@@ -108,7 +123,7 @@ class Extractor:
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(json.dumps(flatten, indent=4))
 
-    def make_request(self, url, params = {}):
+    def make_request(self):
         '''
         send request base on entity, endpoint and params given
         '''
@@ -116,24 +131,23 @@ class Extractor:
             raise Exception('Error missing auth token')
 
         if not self.is_under_quota_limit():
-            raise Exception('Error exceeded daily quota limit')
+            return None
 
-        response = self._api_call(url, params)
+        response = self._api_call(self.url, self.param)
         return response
 
     def execute(self):
 
         logging.info(f'Making request to: {self.url}')
-        data = self.make_request(self.url, self.param)
+        data = self.make_request()
         print(f"data size: {len(data)}")
         if not data or len(data) == 0:
             logging.error(f'Empty result from {self.endpoint}')
-            return 
+            return None
 
         file_path = os.getcwd() + '/out_files/' + self.endpoint +'.json'
-        print(f"FILE PATH: {file_path}")
         self.process_data(data, file_path)
-        print('PROCESS CHECK')
+
         # upload to snowflake
         dframe      = pd.read_json(file_path)
         snowf_util  = SnowfUtility(endpoint=self.endpoint, database=self.database, schema=self.schema)

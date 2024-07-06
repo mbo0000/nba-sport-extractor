@@ -11,7 +11,7 @@ class GamesExtractor(Extractor):
         '''
         dependency for games endpoint
         '''
-        seasons = self.make_request(self.base_url + 'seasons')['response']
+        seasons = self._api_call(self.base_url + 'seasons')['response']
         return seasons[-1]
 
     def set_url(self):

@@ -72,7 +72,7 @@ class GamesStatsExtractor(Extractor):
             result.extend(response['response'])
 
             # usage rate 10 requests per minute
-            time.sleep(6)
+            time.sleep(10)
             idx += 1
 
         return result
