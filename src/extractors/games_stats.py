@@ -5,9 +5,9 @@ import logging
 
 class GamesStatsExtractor(Extractor):
 
-    def __init__(self, endpoint, param = {}):
+    def __init__(self, endpoint, param = {}, database = '', schema = ''):
 
-        super().__init__(endpoint=endpoint, param=param)
+        super().__init__(endpoint=endpoint, param=param, database=database, schema=schema)
         
         self.endpoint   = endpoint
         self.param      = param
@@ -41,7 +41,7 @@ class GamesStatsExtractor(Extractor):
 
         return snowf_con.query_from_table(query)
         
-    def make_request(self, url, params={}):
+    def make_request(self):
         
         '''
         make api requests for games not yet ingested
@@ -49,22 +49,30 @@ class GamesStatsExtractor(Extractor):
 
         existing_games = [game[0] for game in self._get_games()]
         if not existing_games or len(existing_games) == 0:
+            logging.log("No new game statistics to extract or update.")
             return None
 
-        result = []
-        for game in existing_games:
+        result  = []
+        idx     = 0
+        mlen    = len(existing_games)
+
+        # for game in existing_games:
+        while idx < mlen:
 
             if not self.is_under_quota_limit():
                 logging.error('Error exceeded daily quota limit')
                 break
                 
-            self.param  = self.set_param(game)
-            response    = self._api_call(self.url, self.param)
+            game = existing_games[idx]
+
+            self.param                          = self.set_param(game)
+            response                            = self._api_call(self.url, self.param)
             response['response'][0]['game_id']  = game
             response['response'][-1]['game_id'] = game
             result.extend(response['response'])
-            
+
             # usage rate 10 requests per minute
             time.sleep(6)
+            idx += 1
 
         return result

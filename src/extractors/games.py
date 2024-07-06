@@ -1,8 +1,9 @@
 from .extractor import Extractor
+import logging
 
 class GamesExtractor(Extractor):
-    def __init__(self, endpoint, param) -> None:
-        super().__init__(endpoint, param)
+    def __init__(self, endpoint, param, database = '', schema = '') -> None:
+        super().__init__(endpoint=endpoint, param=param, database=database, schema=schema)
         self.set_url()
         self.set_param()
     

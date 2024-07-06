@@ -14,12 +14,14 @@ QUOTA_ENDPOINT  = 'status'
 
 class Extractor:
     
-    def __init__(self, endpoint = '', param = {}) -> None:
+    def __init__(self, endpoint = '', param = {}, database = '', schema = '') -> None:
         self.host        = os.getenv('HOST')
         self.token       = os.getenv('TOKEN')
         self.base_url    = os.getenv('BASE_URL')
         self.endpoint    = endpoint
         self.param       = param
+        self.database    = database
+        self.schema      = schema
         self.url         = self.base_url + self.endpoint
         self.daily_quota = QUOTA
         self.headers     = {
@@ -42,37 +44,6 @@ class Extractor:
         """
         Recursively flattens a nested dictionary or dictionaries within lists, concatenating keys to 
         reflect the structure of the original nested dictionary.
-
-        Parameters:
-            input_dict (dict): The dictionary to flatten.
-            separator (str, optional): The string used to separate key components in the flattened keys.
-                                    Defaults to '_'.
-            prefix (str, optional): A prefix used for keys; useful in recursive calls to maintain the
-                                    current path of nested keys. Defaults to an empty string.
-            skip (list, optional): A list of keys to skip the flattening process for lists contained 
-                                under these keys. Defaults to an empty list.
-            
-        Returns:
-            dict: A new dictionary with flattened keys
-
-        Examples:
-            # Flattening a dictionary with nested dictionaries and lists
-            sample_input = {
-                'a': {
-                    'b': {
-                        'c': 1,
-                        'd': 2
-                    }
-                },
-                'e': [3, {'f': 4}]
-            }
-            print(_flatten(sample_input))
-            # Output: {
-                'a_b_c': 1,
-                'a_b_d': 2,
-                'e': [3, {'f': 4}]
-            }
-            # Note: List under 'e' is not fully flattened because it contains both simple value
         """
 
         if not isinstance(input_dict, dict) and not isinstance(input_dict, list):
@@ -150,22 +121,22 @@ class Extractor:
         response = self._api_call(url, params)
         return response
 
-    def execute(self, endpoint, database, schema):
+    def execute(self):
 
         logging.info(f'Making request to: {self.url}')
         data = self.make_request(self.url, self.param)
-
+        print(f"data size: {len(data)}")
         if not data or len(data) == 0:
             logging.error(f'Empty result from {self.endpoint}')
             return 
 
-        file_path = os.getcwd() + '/out_files/' + endpoint +'.json'
-
+        file_path = os.getcwd() + '/out_files/' + self.endpoint +'.json'
+        print(f"FILE PATH: {file_path}")
         self.process_data(data, file_path)
-
+        print('PROCESS CHECK')
         # upload to snowflake
         dframe      = pd.read_json(file_path)
-        snowf_util  = SnowfUtility(endpoint=endpoint, database=database, schema=schema)
+        snowf_util  = SnowfUtility(endpoint=self.endpoint, database=self.database, schema=self.schema)
         snowf_util.load_data_to_snowf(dframe)
 
         os.remove(file_path)
