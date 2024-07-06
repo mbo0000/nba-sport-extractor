@@ -15,5 +15,5 @@ class Context():
     def extractor(self, extractor : Extractor):
         self._extractor = extractor
 
-    def extract(self):
-        self._extractor.execute()
+    def extract(self, endpoint, database, schema):
+        self._extractor.execute(endpoint, database, schema)

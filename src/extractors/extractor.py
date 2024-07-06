@@ -5,6 +5,8 @@ import logging
 import os
 from datetime import datetime
 import json
+from src.snowf_util import SnowfUtility
+import pandas as pd
 
 
 QUOTA           = 95
@@ -116,7 +118,7 @@ class Extractor:
         logging.info(f'Current quota is {curr_quota}. Number of limit left: {QUOTA - curr_quota}')
         return curr_quota <= self.daily_quota
 
-    def process_data(self, data):
+    def process_data(self, data, file_path):
 
         if isinstance(data, dict):
             data = data['response']
@@ -132,7 +134,7 @@ class Extractor:
         for el in flatten_data:
             flatten.append({k:str(el[k]) for k in el})
 
-        with open('/shared/' + self.endpoint + '.json', 'w', encoding='utf-8') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             file.write(json.dumps(flatten, indent=4))
 
     def make_request(self, url, params = {}):
@@ -148,13 +150,22 @@ class Extractor:
         response = self._api_call(url, params)
         return response
 
-    def execute(self):
+    def execute(self, endpoint, database, schema):
 
         logging.info(f'Making request to: {self.url}')
         data = self.make_request(self.url, self.param)
 
         if not data or len(data) == 0:
             logging.error(f'Empty result from {self.endpoint}')
-            return
-            
-        self.process_data(data)
+            return 
+
+        file_path = os.getcwd() + '/out_files/' + endpoint +'.json'
+
+        self.process_data(data, file_path)
+
+        # upload to snowflake
+        dframe      = pd.read_json(file_path)
+        snowf_util  = SnowfUtility(endpoint=endpoint, database=database, schema=schema)
+        snowf_util.load_data_to_snowf(dframe)
+
+        os.remove(file_path)

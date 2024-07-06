@@ -1,6 +1,7 @@
 from .extractor import Extractor
 from src.snowf_util import SnowfUtility 
 import time
+import logging
 
 class GamesStatsExtractor(Extractor):
 
@@ -21,6 +22,11 @@ class GamesStatsExtractor(Extractor):
         return self.param
 
     def _get_games(self):
+        '''
+        check if table exist, if so pull current games ingested
+        filter for games not ingested from response data
+        '''
+
         snowf_con = SnowfUtility()
         query = '''
             select 
@@ -38,10 +44,7 @@ class GamesStatsExtractor(Extractor):
     def make_request(self, url, params={}):
         
         '''
-        check if table exist, if so pull current games ingested
-        filter for games not ingested from response data
-        make api requests for games not ingested
-        write to file 
+        make api requests for games not yet ingested
         '''
 
         existing_games = [game[0] for game in self._get_games()]
@@ -52,7 +55,8 @@ class GamesStatsExtractor(Extractor):
         for game in existing_games:
 
             if not self.is_under_quota_limit():
-                raise Exception('Error exceeded daily quota limit')
+                logging.error('Error exceeded daily quota limit')
+                break
                 
             self.param  = self.set_param(game)
             response    = self._api_call(self.url, self.param)
