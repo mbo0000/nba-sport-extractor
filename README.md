@@ -70,8 +70,9 @@ To run the script manually for [nba games endpoint](https://api-sports.io/docume
 1. run command
     ```sh
     python main.py --entity games --database your-db-name --schema your-schema-name
+2. replace --entity games with --entity games_statistics for games statistics. 
 
-Integrating with Airflow
+OPTIONAL: Integrating with Airflow
 1.  Define a DAG in Airflow to call this script.
 2.  Ensure all network configurations allow Airflow to access the machine where this program runs.
 Here is an example Airflow DAG snippet to execute this:
@@ -100,14 +101,18 @@ with DAG('data_extraction_dag', default_args=default_args, schedule_interval='@d
 
 For a detail Airflow DAG using this project, visit [NBA Sport Airflow](https://github.com/mbo0000/nba-sport-airflow) repo.
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Future work & improvements
+To expand the project further and create a robust data pipeline:
+1. extract other entities such as players, players statistics, teams and team statistics. 
+2. Capture Slow Changing Dimensions(SCD) through modeling techniques(insert, update, delete) in the source tables.
+3. Thinking about scaling and scaling strategy. In this project, data is saved locally and load into Snowflake. While this works for smaller data set, it will not work for larger data down the road. 
+4. Host on a cloud service provider, such as  AWS, if needed. 
+
 
 ## Contact
 For additional information or questions, please contact:
-1. Minh Bo
-2. Email: mbo0000da@gmail.com
-3. ​[LinkedIn](https://www.linkedin.com/in/minh-b-0bb0628b/)
-4. [​GitHub](https://github.com/mbo0000)
+- Email: mbo0000da@gmail.com
+- ​[LinkedIn](https://www.linkedin.com/in/minh-b-0bb0628b/)
+- [​GitHub](https://github.com/mbo0000)
 
-Thank you for checking out this project! 
+This project is open source and free for use. Thank you for checking out this project!
