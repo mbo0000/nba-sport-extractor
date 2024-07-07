@@ -12,7 +12,8 @@ Welcome to the NBA data extraction and load repository. This project is an essen
 
 - [Introduction](#introduction)
 - [Features](#features)
-- [Architecture](#architecture)
+- [High Level Design](#high-level-design)
+- [Code Design Patterns](#code-design-patterns)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contact](#contact)
@@ -23,14 +24,20 @@ Welcome to the NBA data extraction and load repository. This project is an essen
 - **Data Upload**: Securely upload data to Snowflake using the Snowflake Python connector.
 - **Modular Design**: Easily integrate with Apache Airflow or other orchestration tools.
 
-## Architecture
+## High Level Design
 
 ![Diagram](https://github.com/mbo0000/nba-sport-extractor/blob/main/img/diagram.png)
 
 1. **API Data Extraction**: Retrieves data from specified API endpoints.
-2. **Data Transformation**: Prepare the data for insertion into Snowflake (if applicable).
+2. **Data Formatting**: Prepare the data for insertion into Snowflake (if applicable).
 3. **Upload to Snowflake**: dump the transformed data into Snowflake staging area.
 4. **Integration with Apache Airflow**: OPTIONAL - The program is executed via Airflow, allowing for scheduling and monitoring.
+
+## Code Design Patterns
+
+![Diagram](https://github.com/mbo0000/nba-sport-extractor/blob/main/img/code_pattern.png)
+
+The code base design is subscribed to a hybrid model of Factory and Strategy patterns. All entities in the NBA Sport API follow a consistent pattern for data extraction, formatting, and uploading. Each entity, such as games or game_statistics, implements a standard set of methods and interfaces. When [main.py](https://github.com/mbo0000/nba-sport-extractor/blob/main/main.py) is called externally, such as via Airflow, it determines which extractor subclass to use based on the provided arguments. During runtime, the behavior of each stage is encapsulated within individual subclasses, which are managed by the [Context](https://github.com/mbo0000/nba-sport-extractor/blob/main/src/extractors/context.py) manager. 
 
 ## Installation
 
