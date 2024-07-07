@@ -15,9 +15,6 @@ Welcome to the NBA data extraction and load repository. This project is an essen
 - [Architecture](#architecture)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
 - [Contact](#contact)
 
 ## Features
