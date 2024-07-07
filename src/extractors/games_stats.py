@@ -56,7 +56,7 @@ class GamesStatsExtractor(Extractor):
         idx     = 0
         mlen    = len(existing_games)
 
-        # for game in existing_games:
+        'TODO: ensure data retrieved so far must be saved to file when hit limit, otherwise will risk losing them'
         while idx < mlen:
 
             if not self.is_under_quota_limit():

@@ -91,13 +91,13 @@ class Extractor:
         check current quota usage
         '''
         res = self._api_call(self.base_url + QUOTA_ENDPOINT)
-        res = res['response']['requests']
-
-        if isinstance(res, list):
-            logging.Error('Error: reached daily quota')
+        res = res['response']
+        print(res)
+        if isinstance(res, list) or len(res) == 0 or not res:
+            logging.error('Error: reached daily quota')
             return False
 
-        curr_quota = res['current']
+        curr_quota = res['requests']['current']
 
         print(f'current quota: {curr_quota}/{QUOTA}')
         logging.info(f'Current quota is {curr_quota}. Number of limit left: {QUOTA - curr_quota}')
