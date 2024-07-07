@@ -6,8 +6,8 @@ import logging
 
 
 entities_map = {
-    'games': GamesExtractor
-    ,'games_statistics':GamesStatsExtractor
+    'games'             : GamesExtractor
+    ,'games_statistics' : GamesStatsExtractor
 }
 
 
