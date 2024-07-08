@@ -30,11 +30,11 @@ class GamesStatsExtractor(Extractor):
         snowf_con = SnowfUtility()
         query = '''
             select 
-                id
+                distinct id
             from clean.nba.games 
             where true
                 and id not in (
-                    select id from clean.nba.games_statistics
+                    select distinct game_id from clean.nba.games_statistics
                 )
                 and status_long = 'Finished'
         '''
@@ -49,7 +49,7 @@ class GamesStatsExtractor(Extractor):
 
         existing_games = [game[0] for game in self._get_games()]
         if not existing_games or len(existing_games) == 0:
-            logging.log("No new game statistics to extract or update.")
+            logging.error('No new game statistics to extract or update.')
             return None
 
         result  = []
@@ -70,7 +70,7 @@ class GamesStatsExtractor(Extractor):
             response['response'][0]['game_id']  = game
             response['response'][-1]['game_id'] = game
             result.extend(response['response'])
-
+            
             # usage rate 10 requests per minute
             time.sleep(10)
             idx += 1
