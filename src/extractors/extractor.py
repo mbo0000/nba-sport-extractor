@@ -90,12 +90,19 @@ class Extractor:
         '''
         check current quota usage
         '''
-        res = self._api_call(self.base_url + QUOTA_ENDPOINT)
-        res = res['response']
-        print(res)
-        if isinstance(res, list) or len(res) == 0 or not res:
-            logging.error('Error: reached daily quota')
-            return False
+
+        # handling quota response returns empty, happens really often
+        res         = None
+        idx         = 0
+        MAX_RETRIES = 10
+        while not res or isinstance(res, list) or len(res) == 0:
+            res = self._api_call(self.base_url + QUOTA_ENDPOINT)
+            res = res['response']
+            print("Current Quota response: ", res)
+            if idx > MAX_RETRIES:
+                logging.error("Handling empty quota at max retries")
+                return False
+            idx+=1
 
         curr_quota = res['requests']['current']
 

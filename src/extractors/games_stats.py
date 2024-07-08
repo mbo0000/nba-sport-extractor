@@ -58,9 +58,10 @@ class GamesStatsExtractor(Extractor):
 
         'TODO: ensure data retrieved so far must be saved to file when hit limit, otherwise will risk losing them'
         while idx < mlen:
-
+            print(f"idx: {idx}/{mlen}")
             if not self.is_under_quota_limit():
-                logging.error('Error exceeded daily quota limit')
+                print('quota limit')
+                logging.error('exceeded daily quota limit')
                 break
                 
             game = existing_games[idx]
@@ -70,7 +71,7 @@ class GamesStatsExtractor(Extractor):
             response['response'][0]['game_id']  = game
             response['response'][-1]['game_id'] = game
             result.extend(response['response'])
-            
+
             # usage rate 10 requests per minute
             time.sleep(10)
             idx += 1
