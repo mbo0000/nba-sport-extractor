@@ -109,8 +109,11 @@ To expand the project further and create a robust data pipeline:
 2. Capture Slow Changing Dimensions(SCD) through modeling techniques(insert, update, delete) in the source tables.
 3. OPTIONAL: Thinking about scaling and scaling strategy. In this project, data is saved to file locally and load into Snowflake. While this works for smaller data set, it will not work for larger data down the road. This may not be applicable for a small scale project such as this.
 4. OPTIONAL: Host on a cloud service provider, such as  AWS.
-5. Implement CI/CD 
+5. Implement CI/CD
+6. Fact tables, such as games statistics, does not have a primary key(PK). Would be a good idea to create a PK for them. For example, combine game_id and team_id for games statistics. 
 
+## Limitations
+The NBA Sport account for this project is a free tier account with a daily usage limit of 100 and a maximum of 10 requests per minute. To adhere to these rate limits, some tables may not have the latest data immediately.
 
 ## Contact
 For additional information or questions, please contact:
