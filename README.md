@@ -55,16 +55,27 @@ The code base design is subscribed to a hybrid model of Factory and Strategy pat
     ```sh
     git clone https://github.com/mbo0000/nba-sport-extractor.git
     cd nba-sport-extractor
-2. Run container and install dependencies:
-    ```sh
-    docker compose up -d
-3. Create Snowflake database and schema
-4. Create .env file and provide env credentials for both Snowflake and API Sport. Example: 
+2. Create source and target databases and schemas in Snowflake:
+    - SOURCE: 
+        - database: RAW
+        - schema: NBA_DUMP
+    - TARGET:
+        - database: CLEAN
+        - schema: NBA
+3. Create .env file and provide env credentials for both Snowflake and API Sport. Example: 
     ```
     SNOWF_USER=foo
     SNOWF_PW=foo
     SNOWF_ACCOUNT=foo
+    
+    HOST=v2.nba.api-sports.io
+    TOKEN=foo
+    BASE_URL=foo
     ```
+4. Create container and install dependencies:
+    ```sh
+    docker build -t nba-extractor-image .
+    docker compose up -d
     
 ## Usage
 ### Running the script
@@ -80,15 +91,6 @@ OPTIONAL: Integrating with Airflow
 Here is an example Airflow DAG snippet to execute this:
 
 ```
-from airflow import DAG
-from airflow.operators.bash_operator import BashOperator
-from datetime import datetime
-
-default_args = {
-    'owner': 'yourname',
-    'start_date': datetime(2024, 1, 1),
-}
-
 with DAG('data_extraction_dag', default_args=default_args, schedule_interval='@daily') as dag:
     extract_and_upload = BashOperator(
         task_id='extract_and_upload',
@@ -101,16 +103,14 @@ with DAG('data_extraction_dag', default_args=default_args, schedule_interval='@d
     extract_and_upload
 ```
 
-For a detail Airflow DAG using this project, visit [NBA Sport Airflow](https://github.com/mbo0000/nba-sport-airflow) repo.
+For a complete data pipeline using this project, visit [NBA Sport Airflow](https://github.com/mbo0000/nba-sport-airflow) repo.
 
 ## Future work & improvements
-To expand the project further and create a robust data pipeline:
 1. Extract additional entities such as players, players statistics, teams and team statistics. 
 2. Capture Slow Changing Dimensions(SCD) through modeling techniques(insert, update, delete) in the source tables.
-3. OPTIONAL: Thinking about scaling and scaling strategy. In this project, data is saved to file locally and load into Snowflake. While this works for smaller data set, it will not work for larger data down the road. This may not be applicable for a small scale project such as this.
 4. OPTIONAL: Host on a cloud service provider, such as  AWS.
 5. Implement CI/CD
-6. Fact tables, such as games statistics, does not have a primary key(PK). Would be a good idea to create a PK for them. For example, combine game_id and team_id for games statistics. 
+6. Refine/expand roburst logs for ease of debugging.  
 
 ## Limitations
 The NBA Sport account for this project is a free tier account with a daily usage limit of 100 and a maximum of 10 requests per minute. To adhere to these rate limits, some tables may not have the latest data immediately.
@@ -121,4 +121,4 @@ For additional information or questions, please contact:
 - ​[LinkedIn](https://www.linkedin.com/in/minh-b-0bb0628b/)
 - [​GitHub](https://github.com/mbo0000)
 
-This project is open source and free for use. Thank you for checking out this project!
+Thank you for checking out this project!

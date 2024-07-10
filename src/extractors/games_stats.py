@@ -38,41 +38,47 @@ class GamesStatsExtractor(Extractor):
                 )
                 and status_long = 'Finished'
         '''
-
+        logging.info("retrieving existing games IDs from games table")
         return snowf_con.query_from_table(query)
         
     def make_request(self):
         
         '''
-        make api requests for games not yet ingested
+        make api requests for game stats not yet ingested
         '''
 
         existing_games = [game[0] for game in self._get_games()]
         if not existing_games or len(existing_games) == 0:
-            logging.error('No new game statistics to extract or update.')
+            logging.info('No new game statistics to extract or update.')
             return None
 
         result  = []
         idx     = 0
         mlen    = len(existing_games)
 
-        'TODO: ensure data retrieved so far must be saved to file when hit limit, otherwise will risk losing them'
         while idx < mlen:
-            print(f"idx: {idx}/{mlen}")
+            logging.info(f"numbers of games stats to be extract: {idx}/{mlen}")
+            
             if not self.is_under_quota_limit():
-                print('quota limit')
                 logging.error('exceeded daily quota limit')
                 break
                 
-            game = existing_games[idx]
+            game       = existing_games[idx]
+            self.param = self.set_param(game)
+            response   = self._api_call(self.url, self.param)
+            games_res  = response['response']
 
-            self.param                          = self.set_param(game)
-            response                            = self._api_call(self.url, self.param)
-            response['response'][0]['game_id']  = game
-            response['response'][-1]['game_id'] = game
-            result.extend(response['response'])
+            # skip current game stats if response does not have any result
+            if not games_res or response['results'] < 1:
+                logging.error(f'Empty result from games_statistics with game ID of {game}')
+                logging.error(response['errors'])
+                continue
 
-            # usage rate 10 requests per minute
+            games_res[0]['game_id']  = game
+            games_res[-1]['game_id'] = game
+            result.extend(games_res)
+
+            # usage rate buffer
             time.sleep(10)
             idx += 1
 

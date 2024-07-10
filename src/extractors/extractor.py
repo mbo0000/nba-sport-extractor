@@ -10,7 +10,7 @@ import pandas as pd
 import time
 
 
-QUOTA           = 95
+QUOTA           = 90
 QUOTA_ENDPOINT  = 'status'
 
 class Extractor:
@@ -72,7 +72,7 @@ class Extractor:
         '''
         make api request with error handling for rate limit
         '''
-        try:
+        try:    
             response = requests.get(url, headers = self.headers, params = params)
 
             if response.status_code == 429 or response.status_code != 200:
@@ -91,14 +91,13 @@ class Extractor:
         check current quota usage
         '''
 
-        # handling quota response returns empty, happens really often
+        # handling quota response returns empty even with status code of 200, happens frequently
         res         = None
         idx         = 0
         MAX_RETRIES = 10
         while not res or isinstance(res, list) or len(res) == 0:
             res = self._api_call(self.base_url + QUOTA_ENDPOINT)
             res = res['response']
-            print("Current Quota response: ", res)
             if idx > MAX_RETRIES:
                 logging.error("Handling empty quota at max retries")
                 return False
@@ -127,6 +126,7 @@ class Extractor:
         for el in flatten_data:
             flatten.append({k:str(el[k]) for k in el})
 
+        logging.info(f"save processed data to file. Data len: {len(flatten)}")
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(json.dumps(flatten, indent=4))
 

@@ -1,5 +1,4 @@
 from .extractor import Extractor
-import logging
 
 class GamesExtractor(Extractor):
     def __init__(self, endpoint, param, database = '', schema = '') -> None:
