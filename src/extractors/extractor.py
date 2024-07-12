@@ -76,7 +76,7 @@ class Extractor:
             response = requests.get(url, headers = self.headers, params = params)
 
             if response.status_code == 429 or response.status_code != 200:
-                logging.error(response.json()['errors'])
+                logging.error(f"API request error: {response.json()['errors']}")
                 while response.status_code == 429:
                     time.sleep(10)
                     response = requests.get(url, headers = self.headers, params = params)
@@ -95,9 +95,10 @@ class Extractor:
         res         = None
         idx         = 0
         MAX_RETRIES = 10
-        while not res or isinstance(res, list) or len(res) == 0:
+        while not res or len(res) == 0:
             res = self._api_call(self.base_url + QUOTA_ENDPOINT)
             res = res['response']
+            logging.info(f"Quota Response: {res}")
             if idx > MAX_RETRIES:
                 logging.error("Handling empty quota at max retries")
                 return False
@@ -147,7 +148,6 @@ class Extractor:
 
         logging.info(f'Making request to: {self.url}')
         data = self.make_request()
-        print(f"data size: {len(data)}")
         if not data or len(data) == 0:
             logging.error(f'Empty result from {self.endpoint}')
             return None
