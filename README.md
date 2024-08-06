@@ -16,6 +16,8 @@ Welcome to the NBA data extraction and load repository. This project is an essen
 - [Code Design Patterns](#code-design-patterns)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Future Works & Improvements](#future-works-&-improvements)
+- [Limitation](#limitation)
 - [Contact](#contact)
 
 ## Features
@@ -112,7 +114,7 @@ For a complete data pipeline using this project, visit [NBA Sport Airflow](https
 5. Implement CI/CD
 6. Refine/expand roburst logs for ease of debugging.  
 
-## Limitations
+## Limitation
 The NBA Sport account for this project is a free tier account with a daily usage limit of 100 and a maximum of 10 requests per minute. To adhere to these rate limits, some tables may not have the latest data immediately.
 
 ## Contact
