@@ -31,10 +31,10 @@ class GamesStatsExtractor(Extractor):
         query = '''
             select 
                 distinct id
-            from clean.nba.games 
+            from raw.nba.games 
             where true
                 and id not in (
-                    select distinct game_id from clean.nba.games_statistics
+                    select distinct game_id from raw.nba.games_statistics
                 )
                 and status_long = 'Finished'
         '''
